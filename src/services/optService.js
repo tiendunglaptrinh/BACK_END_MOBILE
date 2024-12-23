@@ -4,17 +4,15 @@ import { createClient } from "@redis/client";
 
 class OtpService {
   constructor() {
-    const redisUrl = process.env.UPSTASH_REDIS_REST_URL;
+    this.client = createClient({ url: process.env.UPSTASH_REDIS_REST_URL });
 
-    this.client = createClient({ url: redisUrl });
-
-    this.client.on('error', (err) => {
-      console.log('Redis error: ', err);
+    this.client.on("error", (err) => {
+      console.log("Redis error: ", err);
     });
 
     this.client
       .connect()
-      .catch((err) => console.error('Error connecting to Redis:', err));
+      .catch((err) => console.error("Error connecting to Redis:", err));
   }
 
   sendOTP = async (response) => {
@@ -23,7 +21,7 @@ class OtpService {
       const account_sid = process.env.ACCOUNT_SID;
       const auth_token = process.env.AUTH_TOKEN;
       const twilioPhone = process.env.TWILIO_PHONE;
-      
+
       const client = twilio(account_sid, auth_token);
       const otp = await this.generateOTP();
       const message = await client.messages.create({
@@ -39,7 +37,7 @@ class OtpService {
       }
 
       await this.client.setEx(`otp:${phone}`, ttl, otp);
-      
+
       console.log(`OTP sent successfully to ${phone}: ${message.sid}`);
 
       return response.status(200).json({
@@ -54,7 +52,7 @@ class OtpService {
       });
     }
   };
-  
+
   generateOTP = async () => {
     const otp = Math.floor(100000 + Math.random() * 900000);
     const otpString = otp.toString();
