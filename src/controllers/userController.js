@@ -3,6 +3,8 @@ import validator from "validator";
 import OtpService from "../services/optService.js";
 import UserService from "../services/userService.js";
 import { HashPassword } from "../untils/hash.js";
+import { getTokenFromHeader } from "../middlewares/authMiddleware.js";
+import jwtService from "../services/jwtService.js";
 
 class UserController {
   createUserStep1 = async (req, res) => {
@@ -124,6 +126,26 @@ class UserController {
       });
       next();
     }
+  };
+
+  changePassword = async (req, res) => {
+    const { old_password, new_password } = req.body;
+
+    if (!old_password || !new_password) {
+      return res.status(500).json({
+        success: false,
+        message: "Vui lòng nhập đủ các trường thông tin !!!",
+      });
+    }
+
+    const token = getTokenFromHeader(req, res);
+
+    const userId = jwtService.decodeToken(token);
+
+    const dataChange =  { old_password, new_password, userId };
+
+    console.log(">>> check datachane: ", dataChange);
+    return await UserService.changePassword(dataChange, res);
   };
 
   updateInfo = async (req, res, next) => {

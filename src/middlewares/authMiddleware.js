@@ -1,21 +1,34 @@
 import jwt from "jsonwebtoken";
 import "dotenv/config";
 
-const authMiddleware = (req, res, next) => {
+const getTokenFromHeader = (req, res) => {
   const authHeader = req.headers["authorization"];
   if (!authHeader) {
     return res.status(401).json({
       message: "Token does not exist",
     });
   }
-  const token = authHeader.split(" ")[1];
-  jwt.verify(token, process.env.ACCESS_TOKEN, (err, user) => {
-    if (err) {
-      return res.status(401).json({ message: "Token is invalid or expired" });
-    }
-    req.user = user;
-    next();
-  });
+  return authHeader.split(" ")[1];
 };
 
-export { authMiddleware };
+const authMiddleware = async (req, res, next) => {
+  try {
+    const token = getTokenFromHeader(req, res);
+    if (!token) return;
+
+    const user = await new Promise((resolve, reject) => {
+      jwt.verify(token, process.env.ACCESS_TOKEN, (err, decoded) => {
+        if (err) reject(err);
+        resolve(decoded);
+      });
+    });
+
+    // Gán thông tin user vào request
+    req.user = user;
+    next(); // Gọi middleware tiếp theo
+  } catch (err) {
+    return res.status(401).json({ message: "Token is invalid or expired" });
+  }
+};
+
+export { authMiddleware, getTokenFromHeader };

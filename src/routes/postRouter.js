@@ -1,13 +1,11 @@
-// import express from "express";
-// import AccountController from "../controllers/AccountController.js";
-// import { authMiddleware } from "../middleware/AuthMiddleware.js";
+import express from "express";
+import PostController from "../controllers/postController.js";
+import { authMiddleware } from "../middlewares/authMiddleware.js";
 
-// const accountRouter = express.Router();
+const postRouter = express.Router();
 
-// // accountRouter.post("/create/step1", AccountController.createAccountStep1);
-// // accountRouter.post("/create/step2", AccountController.createAccountStep2);
-// // accountRouter.post("/create/step3", AccountController.createAccountStep3);
-// // accountRouter.post("/login", AccountController.login);
-// // accountRouter.put("/update/:id", authMiddleware, AccountController.updateInfo);
+postRouter.post("/create/step1",authMiddleware,  PostController.createPostStep1);  
+postRouter.post("/create/step2",authMiddleware,  PostController.createPostStep2);  
+postRouter.post("/create/step3",authMiddleware,  PostController.createPostStep3);  
 
-// export default accountRouter;
+export default postRouter;

@@ -1,16 +1,16 @@
-import jwt from "jsonwebtoken"
-import "dotenv/config"
+import jwt from "jsonwebtoken";
+import "dotenv/config";
 
 class JwtService {
   generateAccessToken = (payload_user) => {
-      console.log(">>> check payload: ", payload_user);
+    console.log(">>> check payload: ", payload_user);
     const access_token = jwt.sign(payload_user, process.env.ACCESS_TOKEN, {
       expiresIn: "1m",
     });
     return access_token;
   };
   generateRefreshToken = (payload_user) => {
-      console.log(">>> check payload: ", payload_user);
+    console.log(">>> check payload: ", payload_user);
     const refresh_token = jwt.sign(payload_user, process.env.REFRESH_TOKEN, {
       expiresIn: "1 days",
     });
@@ -32,7 +32,7 @@ class JwtService {
         { userId: userId, userRole: userRole },
         process.env.ACCESS_TOKEN,
         {
-          expiresIn: "10m",
+          expiresIn: "1h",
         }
       );
       return res.status(200).json({
@@ -41,6 +41,13 @@ class JwtService {
       });
     } catch (error) {}
     next();
+  };
+
+  decodeToken = (token) => {
+    const decode = jwt.verify(token, process.env.ACCESS_TOKEN);
+    const userId = decode.userId;
+    console.log(">>> check userId decode from access token: ", userId);
+    return userId;
   };
 }
 

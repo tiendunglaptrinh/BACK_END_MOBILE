@@ -1,7 +1,8 @@
 import JwtService from "./jwtService.js";
-import { CompareHash } from "../untils/hash.js";
+import { CompareHash, HashPassword } from "../untils/hash.js";
 import User from "../models/userModel.js";
 import { Op } from "sequelize";
+import { getTokenFromHeader } from "../middlewares/authMiddleware.js";
 
 class UserService {
   loginService = async (accountLogin, response) => {
@@ -67,6 +68,43 @@ class UserService {
       return response.status(400).json({
         success: false,
         message: error.message,
+      });
+    }
+  };
+  changePassword = async (dataChange, response) => {
+    const { old_password, new_password, userId } = dataChange;
+
+    try {
+      const userAccount = await User.findOne({ where: { id: userId } });
+      if (!userAccount) {
+        return response.status(400).json({
+          success: false,
+          message: "User không tồn tại.",
+        });
+      }
+
+      const isMatch = await CompareHash(old_password, userAccount.password);
+      if (!isMatch) {
+        return response.status(400).json({
+          success: false,
+          message: "Mật khẩu cũ không chính xác.",
+        });
+      }
+
+      const hashedPassword = await HashPassword(new_password, 10);
+      await User.update(
+        { password: hashedPassword },
+        { where: { id: userId } }
+      );
+      return response.status(200).json({
+        success: true,
+        message: "Đổi mật khẩu thành công.",
+      });
+    } catch (error) {
+      console.error(error);
+      return response.status(500).json({
+        success: false,
+        message: "Đã xảy ra lỗi, vui lòng thử lại sau.",
       });
     }
   };
