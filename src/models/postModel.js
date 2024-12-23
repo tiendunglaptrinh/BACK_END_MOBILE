@@ -38,7 +38,7 @@ const Post = sequelize.define(
       allowNull: false,
     },
     comfort: {
-      type: DataTypes.ENUM('TV', 'standard', 'luxury'),
+      type: DataTypes.ENUM('TV', 'Máy giặt', 'Tủ lạnh', "Bể bơi"),
       allowNull: false,
     },
     image: {
