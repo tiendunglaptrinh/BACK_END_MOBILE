@@ -18,7 +18,6 @@ const HashPassword = async (password, round) => {
 
 const CompareHash = async (password, hash) => {
   try {
-    // Sử dụng bcrypt.compare (phiên bản bất đồng bộ)
     return await bcrypt.compare(password, hash);
   } catch (error) {
     console.error("Error comparing password:", error);
