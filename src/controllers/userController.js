@@ -1,4 +1,5 @@
 import User from "../models/userModel.js";
+import Post from "../models/postModel.js";
 import validator from "validator";
 import OtpService from "../services/optService.js";
 import UserService from "../services/userService.js";
@@ -181,9 +182,7 @@ class UserController {
 
   getInfo = async (req, res) => {
     const token = getTokenFromHeader(req);
-    console.log(">>> check token: ", token);
     const userId = jwtService.decodeToken(token);
-    console.log(">>> check userId from token: ", userId);
 
     const userAccount = await User.findOne({ where: { id: userId } });
     if (!userAccount) {
@@ -195,8 +194,25 @@ class UserController {
 
     return res.status(200).json({
       success: true,
-      user: userAccount
-    })
+      user: userAccount,
+    });
+  };
+
+  getPosts = async (req, res) => {
+    const token = getTokenFromHeader(req);
+    const userId = jwtService.decodeToken(token);
+    const userAccount = await User.findOne({ where: { id: userId } });
+    if (!userAccount) {
+      return response.status(400).json({
+        success: false,
+        message: "User không tồn tại.",
+      });
+    }
+    const posts = await Post.findAll({ where: { userId: userId } });
+    return res.status(200).json({
+      success: true,
+      posts: posts,
+    });
   };
 }
 
