@@ -142,7 +142,7 @@ class UserController {
 
     const userId = jwtService.decodeToken(token);
 
-    const dataChange =  { old_password, new_password, userId };
+    const dataChange = { old_password, new_password, userId };
 
     console.log(">>> check datachane: ", dataChange);
     return await UserService.changePassword(dataChange, res);
@@ -177,6 +177,26 @@ class UserController {
         error: error.message,
       });
     }
+  };
+
+  getInfo = async (req, res) => {
+    const token = getTokenFromHeader(req);
+    console.log(">>> check token: ", token);
+    const userId = jwtService.decodeToken(token);
+    console.log(">>> check userId from token: ", userId);
+
+    const userAccount = await User.findOne({ where: { id: userId } });
+    if (!userAccount) {
+      return response.status(400).json({
+        success: false,
+        message: "User không tồn tại.",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      user: userAccount
+    })
   };
 }
 
