@@ -149,28 +149,21 @@ class UserController {
     return await UserService.changePassword(dataChange, res);
   };
 
-  updateInfo = async (req, res, next) => {
+  updateInfo = async (req, res) => {
     try {
-      const { full_name, email, phone } = req.body;
-      const user_from_reqURL = req.params.id;
-      const user_from_token = req.user.userId;
-      console.log("check id user from url: ", user_from_reqURL);
-      console.log("check id user from token: ", user_from_token);
-      if (user_from_reqURL != user_from_token) {
+      const { fName, lName, email } = req.body;
+
+      if (!fName || !email || !lName) {
         return res.status(403).json({
           success: false,
-          message: "Unauthorization !!!",
+          message: "Vui lòng nhập đầy đủ trường thông tin !!!",
         });
       }
-      //  Tiếp tục
-      if (!full_name || !phone || !email || !birthday) {
-        return res.status(400).json({
-          success: false,
-          message: "Vui lòng nhập thông tin chỉnh sửa đầy đủ !!!",
-        });
-      }
-      const userId = user_from_reqURL;
-      const updateData = { userId, full_name, email, phone, birthday };
+      const token = getTokenFromHeader(req);
+      const userId = jwtService.decodeToken(token);
+
+      const updateData = { userId, fName, lName, email };
+      console.log(">>> check updateData: ", updateData);
       return await UserService.updateInfo(updateData, res);
     } catch (error) {
       return res.status(500).json({

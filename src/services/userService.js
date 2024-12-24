@@ -44,30 +44,36 @@ class UserService {
   };
   updateInfo = async (userData, response) => {
     try {
-      const { userId, full_name, email, phone, birthday } = userData;
-      const infoUpdate = { full_name, email, phone, birthday };
+      const { userId, fName, lName, email } = userData;
+      
+      const infoUpdate = { fName, lName, email };
+      console.log("Update user service: ", infoUpdate);
 
-      const user = await Account.findOneAndUpdate({ _id: userId }, infoUpdate, {
-        new: true,
+      const [rowsUpdated, [updatedUser]] = await User.update(infoUpdate, {
+        where: { id: userId },
+        returning: true,
       });
 
-      if (!user) {
+      if (rowsUpdated === 0) {
         return response.status(404).json({
           success: false,
-          message: "Không tìm thấy người dùng !!!",
+          message: "Không tìm thấy người dùng!",
         });
       }
 
       return response.status(200).json({
         success: true,
-        message: "Cập nhật thông tin thành công !!!",
-        data: user,
+        message: "Cập nhật thông tin thành công!",
+        data: updatedUser,
       });
     } catch (error) {
-      console.error("Lỗi trong service updateInfo:", error.message); // Debug lỗi
-      return response.status(400).json({
+      console.error("Lỗi trong service updateInfo:", error.message); // Ghi log lỗi để debug
+
+      // Trả về phản hồi lỗi
+      return response.status(500).json({
         success: false,
-        message: error.message,
+        message: "Đã xảy ra lỗi khi cập nhật thông tin!",
+        error: error.message,
       });
     }
   };
