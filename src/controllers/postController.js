@@ -41,7 +41,7 @@ class PostController {
       console.log(">>> check indo: ", userPhone);
       console.log(">>> check indo: ", userName);
       req.session = req.session || {};
-      req.session.post = { namePost, typeRoom, price, deposit, description, userId, userEmail, userPhone, userName };
+      req.session.post = { namePost, typeRoom, price, deposit, description, userId, userEmail, userPhone, userName, size };
 
       return res.status(200).json({
         message: "Next step -> 2",
@@ -103,7 +103,7 @@ class PostController {
   createPostStep3 = async (req, res) => {
     const { image } = req.body;
     // verify userId from token
-    const token = req.headers["authorization"].split(" ")[1];
+    // const token = req.headers["authorization"].split(" ")[1];
     const currentPost = req.session.post;
     req.session.post = {
       ...currentPost,
