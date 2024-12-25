@@ -21,8 +21,12 @@ const Post = sequelize.define(
       type: DataTypes.INTEGER,
       allowNull: false,
     },
+    size: {
+      type: DataTypes.INTEGER,
+      allowNull: true
+    },
     description: {
-      type: DataTypes.STRING,
+      type: DataTypes.STRING(1000),
       allowNull: false,
     },
     address: {
@@ -38,8 +42,8 @@ const Post = sequelize.define(
       allowNull: false,
     },
     comfort: {
-      type: DataTypes.ENUM('TV', 'Máy giặt', 'Tủ lạnh', "Bể bơi"),
-      allowNull: false,
+      type: DataTypes.STRING,
+      allowNull: true,
     },
     image: {
       type: DataTypes.STRING,
@@ -53,6 +57,18 @@ const Post = sequelize.define(
       },
       allowNull: false,
     },
+    userName: {
+      type: DataTypes.STRING,
+      allowNull: true
+    },
+    userPhone: {
+      type: DataTypes.STRING,
+      allowNull: true
+    },
+    userEmail: {
+      type: DataTypes.STRING,
+      allowNull: true
+    }
   },
   {
     tableName: 'posts',

@@ -1,10 +1,14 @@
 import Post from "../models/postModel.js";
-
+import User from "../models/userModel.js";
+import PostService from "../services/postService.js"
+import JwtService from "../services/jwtService.js";
+import { getTokenFromHeader } from "../middlewares/authMiddleware.js";
 class PostController {
   createPostStep1 = async (req, res) => {
     try {
-      const { namePost, typeRoom, price, deposit, description } = req.body;
+      const { namePost, typeRoom, price, deposit, description, size } = req.body;
 
+      const userId = JwtService.decodeToken(getTokenFromHeader(req));
       // Validate input
       if (!namePost)
         return res
@@ -26,9 +30,18 @@ class PostController {
         return res
           .status(400)
           .json({ success: false, message: "Vui lòng nhập mô tả." });
+      
+      const user = await User.findOne({where: {id: userId}});
+      console.log(">>> check user from create step 1: ", user.dataValues);
+      const userEmail = user.dataValues.email;
+      const userPhone = user.dataValues.phone;
+      const userName = user.dataValues.fName + user.dataValues.lName;
 
+      console.log(">>> check indo: ", userEmail);
+      console.log(">>> check indo: ", userPhone);
+      console.log(">>> check indo: ", userName);
       req.session = req.session || {};
-      req.session.post = { namePost, typeRoom, price, deposit, description };
+      req.session.post = { namePost, typeRoom, price, deposit, description, userId, userEmail, userPhone, userName };
 
       return res.status(200).json({
         message: "Next step -> 2",
@@ -91,20 +104,31 @@ class PostController {
     const { image } = req.body;
     // verify userId from token
     const token = req.headers["authorization"].split(" ")[1];
+    const currentPost = req.session.post;
     req.session.post = {
       ...currentPost,
-      address,
-      bedroom,
-      bathroom,
-      comfort,
-      image,
-      userId,
+      image
     };
+
+    return await PostService.createPost(req.session.post, res);
   };
 
   updatePostStep1 = async (req, res) => {
+    const { namePost, typeRoom, price, deposit, description, size } = req.body;
     try {
-      const { namePost, typeRoom, price, deposit, description } = req.body;
+
+      const userId = JwtService.decodeToken(getTokenFromHeader(req));
+      console.log(">>> check id param: ", req.params.id);
+
+      const postUpdated = await Post.findOne({where: {id: req.params.id}});
+      const idAuthen = postUpdated.dataValues.userId;
+      
+      if (idAuthen !== userId){
+        return res.status(400).json({
+          success: false,
+          message: "No have authorization !!!"
+        })
+      }
 
       if (!namePost)
         return res
@@ -128,7 +152,8 @@ class PostController {
           .json({ success: false, message: "Vui lòng nhập mô tả." });
 
       req.session = req.session || {};
-      req.session.post = { namePost, typeRoom, price, deposit, description };
+      const idPost = req.params.id;
+      req.session.post = { namePost, typeRoom, price, deposit, description, userId, idPost };
 
       return res.status(200).json({
         message: "Next step -> 2",
@@ -187,6 +212,18 @@ class PostController {
       current_post: req.session.post,
     });
   };
+  updatePostStep3 = async (req, res) => {
+    const { image } = req.body;
+    // verify userId from token
+    const token = req.headers["authorization"].split(" ")[1];
+    const currentPost = req.session.post;
+    req.session.post = {
+      ...currentPost,
+      image
+    };
+
+    return await PostService.UpdatePost(req.session.post, res);
+  }
   getAllPosts = async (req, res) => {
     try {
       const posts = await Post.findAll(); // Lấy tất cả bài đăng

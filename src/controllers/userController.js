@@ -47,7 +47,7 @@ class UserController {
       }
       const otp = await OtpService.generateOTP();
       req.session.user = { fName, lName, email, phone, password };
-
+      console.log(">>> check session: ", req.session.user);
       await OtpService.sendOTP(res);
     } catch (error) {
       console.error("Error creating user:", error.message);
@@ -61,16 +61,16 @@ class UserController {
 
   createUserStep2 = async (req, res) => {
     try {
-      const { phone, otp } = req.body;
+      const { phone_receive, otp } = req.body;
 
-      if (!phone || !otp) {
+      if (!phone_receive || !otp) {
         return res.status(400).json({
           success: false,
           message: "Phone number and OTP are required.",
         });
       }
 
-      const isOtpValid = await OtpService.verifyOTP(phone, otp);
+      const isOtpValid = await OtpService.verifyOTP(phone_receive, otp);
       if (!isOtpValid) {
         return res.status(400).json({
           success: false,
@@ -78,7 +78,7 @@ class UserController {
         });
       }
 
-      const { fName, lName, email, password: plainPassword } = req.session.user;
+      const { fName, lName, email, password: plainPassword, phone } = req.session.user;
       const hashedPassword = await HashPassword(plainPassword, 10);
       let password = hashedPassword;
 
