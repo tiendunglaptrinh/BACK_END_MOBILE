@@ -5,7 +5,7 @@ class JwtService {
   generateAccessToken = (payload_user) => {
     console.log(">>> check payload: ", payload_user);
     const access_token = jwt.sign(payload_user, process.env.ACCESS_TOKEN, {
-      expiresIn: "10m",
+      expiresIn: "50m",
     });
     return access_token;
   };
